@@ -1,15 +1,5 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Sockets;
-using System.Reflection.Emit;
-using System.Runtime.Serialization;
-using UnityEditorInternal;
 using UnityEngine;
-using UnityEngine.EventSystems;
-
-
 public class Grid : MonoBehaviour
 {
     private int Width;
@@ -24,86 +14,24 @@ public class Grid : MonoBehaviour
 	public GameObject ResetCel;
     public GameObject PlayerCell;
     public GameObject CellParent;
-    
+
     /// use to group the cells
     private static int CellId = 0;
-
-    [SerializeField]
-    public ICell[,] cells;
-
-
-    [SerializeField] 
-    public Serialiseable2DArray I; 
+    private ICell[,] cells;
 
     // Use this for initialization
 	void Start ()
 	{
-        //ReadLevel("Level1");
-	    //LoadObjectsToGrid();
+        ReadLevel("Level1");
 	}
 
-    private void LoadObjectsToGrid()
-    {
-        var objects = FindObjectsOfType<GameObject>();
-        var iCells =
-            objects.Where(o => o.GetComponent<ICell>() != null)
-                .ToList()
-                .ConvertAll<ICell>(o => o.GetComponent<ICell>());
-        Rect[,] rects;
-        if (cells == null) { 
-            var maxX = iCells.Aggregate((i1,
-                i2) =>
-                (Math.Abs(i1.GameObject.transform.position.x) > Math.Abs(i2.GameObject.transform.position.x) ? i1 : i2)).GameObject.transform.position.x;
-            var maxZ = iCells.Aggregate((i1,
-                i2) =>
-                (Math.Abs(i1.GameObject.transform.position.z) > Math.Abs(i2.GameObject.transform.position.z) ? i1 : i2)).GameObject.transform.position.z;
-
-            var x = Math.Abs((int) (maxX / CellSize)) + 1;
-            var z = Math.Abs((int) (maxZ / CellSize)) + 1;
-            Debug.Log("x" + x +  ": z" + z);
-            cells = new ICell[x,z];
-
-            rects = new Rect[x,z];
-            for (int i = 0; i < rects.GetLength(0); i++)
-            {
-                for (int j = 0; j < rects.GetLength(1); j++)
-                {
-                    var pos = GetPosition(i, j);
-                    rects[i,j] = new Rect(pos.x,pos.z, CellSize, CellSize);
-               }
-            }
-            foreach (ICell cell in iCells)
-            {
-                for (int i = 0; i < rects.GetLength(0); i++)
-                {
-                    for (int j = 0; j < rects.GetLength(1); j++)
-                    {
-                      Vector2 pos = new Vector2(cell.GameObject.transform.position.x, cell.GameObject.transform.position.z);
-                        if (rects[i, j].Contains(pos))
-                        {
-                            cells[i, j] = cell;
-                            cell.GridX = i;
-                            cell.GridY = j;
-                            break;;
-                        }
-                   }
-                }
-            }
-        }
-        Debug.Log(cells);
-    }
-
-    public void ReadLevel(string levelName)
+    private void ReadLevel(string levelName)
     {
         TextAsset level = Resources.Load(levelName) as TextAsset;
         if (!level)
         {
             throw new Exception("Level file not Found");
         }
-        //create parent
-        CellParent = new GameObject("Boxes");
-
-
         var lines = level.text.Split(Environment.NewLine.ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
         Height = lines.Length;
         Width = lines[0].Length;
@@ -366,143 +294,3 @@ public interface IChainPushableCell : ICell
     bool MoveDown();
 }
 
-
-public class AutoIncreaseList<T> : List<T> where T : new()
-{
-    public T this[int key]
-    {
-        get { return base[key]; }
-        set
-        {
-            if (key >= base.Count)
-            {
-                var extra = key - base.Count;
-                for (int i = 0; i < extra; i++)
-                {
-                    base.Add(new T());
-                }
-            }
-        }
-    }
-
-    public AutoIncreaseList()
-    {
-        
-    }
-    public AutoIncreaseList(int size)
-    {
-        base.AddRange(Enumerable.Repeat(default(T), size));
-    } 
-}
-
-[System.Serializable]
- public class Serialiseable2DArray : IEnumerable
-  {
-
-    [SerializeField]
-    public GameObject[] _items;
-    private Size _size;
- 
-    public Serialiseable2DArray()
-    { }
- 
-    public Serialiseable2DArray(int width, int height)
-      : this(new Size(width, height))
-    { }
-
-    public Serialiseable2DArray(Size size)
-      : this()
-    {
-      this.Size = size;
-    }
-
-    public IEnumerator<GameObject> GetEnumerator()
-    {
-        foreach (GameObject item in _items)
-        yield return item;
-    }
- 
-    public int GetItemIndex(int x, int y)
-    {
-      if (x < 0 || x >= this.Size.Width)
-        throw new IndexOutOfRangeException("X is out of range");
-      else if (y < 0 || y >= this.Size.Height)
-        throw new IndexOutOfRangeException("Y is out of range");
- 
-      return y * this.Size.Width + x;
-    }
- 
-    public int GetItemIndex(Point point)
-    {
-      return this.GetItemIndex(point.X, point.Y);
-    }
- 
-    public Point GetItemLocation(int index)
-    {
-      Point point;
- 
-      if (index < 0 || index >= _items.Length)
-        throw new IndexOutOfRangeException("Index is out of range");
- 
-      point = new Point();
-      point.Y = index / this.Size.Width;
-      point.X = index - (point.Y * this.Size.Height);
- 
-      return point;
-    }
- 
-    public int Count
-    { get { return _items.Length; } }
- 
-    public Size Size
-    {
-      get { return _size; }
-      set
-      {
-        _size = value;
-        _items = new GameObject[_size.Width * _size.Height];
-      }
-    }
-
-    public GameObject this[Point location]
-    {
-      get { return this[location.X, location.Y]; }
-      set { this[location.X, location.Y] = value; }
-    }
-
-    public GameObject this[int x, int y]
-    {
-      get { return this[this.GetItemIndex(x, y)]; }
-      set { this[this.GetItemIndex(x, y)] = value; }
-    }
-
-    public GameObject this[int index]
-    {
-      get { return _items[index]; }
-      set { _items[index] = value; }
-    }
- 
-    IEnumerator IEnumerable.GetEnumerator()
-    {
-      return this.GetEnumerator();
-    }
-  }
-[System.Serializable]
-public class Size
-{
-    public int Width;
-    public int Height;
-
-    public Size(int w,
-        int h)
-    {
-        this.Width = w;
-        this.Height = h;
-    }
-}
-
-public struct Point
-{
-    public int X;
-    public int Y;
-}
