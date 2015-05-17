@@ -7,6 +7,9 @@ public class WindCubeEffect : MonoBehaviour {
 	[SerializeField]
 	public float speed;
 	public float direction;
+	[SerializeField]
+	private string targetTag;
+	//private string targetTag2;
 
 
 	// Use this for initialization
@@ -29,7 +32,7 @@ public class WindCubeEffect : MonoBehaviour {
 	void OnCollisionStay(Collision collisionInfo) {
 
 		GameObject go = collisionInfo.gameObject;
-		if (go.CompareTag ("Player")) {
+		if (go.CompareTag (targetTag)) {
 			go.transform.Translate (v3 * Time.deltaTime * speed, Space.World);
 		}
 

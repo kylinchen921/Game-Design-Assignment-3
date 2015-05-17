@@ -24,10 +24,10 @@ public class Cube : MonoBehaviour
 			//transform.position += pushDir;
 			//GetComponent<Rigidbody>().AddForce(pushDir * speed);
 		}
-
+	
 	    if (IsMoved && transform.position.Equals2D(targetPosition))
 	    {
-			GameObject.Find("Grid").GetComponent<Grid>().ForeceGrid();
+			//GameObject.Find("Grid").GetComponent<Grid>().ForeceGrid();
 	        IsMoved = false;
 	    }
 	}

@@ -8,6 +8,12 @@ TagManager:
   - GridCell
   - DamagingParticle
   - WallCube
+  - TrapWall
+  - Trap
+  - BossTrap
+  - Lift
+  - Rune
+  - Weapon
   layers:
   - Default
   - TransparentFX
@@ -18,7 +24,7 @@ TagManager:
   - 
   - 
   - CloudsToy
-  - 
+  - BossFight
   - 
   - 
   - 
