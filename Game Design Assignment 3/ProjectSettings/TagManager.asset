@@ -4,7 +4,16 @@
 TagManager:
   serializedVersion: 2
   tags:
-  - Boxes
+  - Cube
+  - GridCell
+  - DamagingParticle
+  - WallCube
+  - TrapWall
+  - Trap
+  - BossTrap
+  - Lift
+  - Rune
+  - Weapon
   layers:
   - Default
   - TransparentFX
@@ -14,8 +23,8 @@ TagManager:
   - UI
   - 
   - 
-  - 
-  - 
+  - CloudsToy
+  - BossFight
   - 
   - 
   - 
